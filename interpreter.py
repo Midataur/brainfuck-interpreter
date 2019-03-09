@@ -1,13 +1,11 @@
 #encoding: utf-8
 #Bf interpreter by Max Petschack
-#Note: Only works on ios due to usage of 'console' module
 #Bf is a turing complete cell based programming language invented by Urban Muller
 #It is comprised of 8 characters and has no conditionals, only loops, incrementing and decrementing by 1 at a time, reading user input and printing the ascii value of a cell
 #Each cell is represented by one byte and there are infinite of them
 #Link to the wiki page: en.m.wikipedia.org/wiki/Brainfuck
 
 import re
-import console
 import time
 
 visualizer = False #Decides if we display a visulisation of the bf program being run
@@ -45,17 +43,30 @@ def change_cell(): #Moves current cell pointer
 
 def get_input(): #Gets exactly one char of input from user and puts its ascii val in the current cell
 	inp = raw_input('')[0]
-	cells[curcell] = ord(inp)
-	console.clear() #Erases user input prompt
+	cells[curcell] = ord(inp) #Erases user input prompt
 
 def print_cell(): #Converts current cell value to ascii char, adds to stack and prints stack
-	console.clear() #Clear incase we've already done this
+	#Clear incase we've already done this
 	global stack
 	stack += chr(cells[curcell])
 	print stack
 
-def new_loop(): #Even though it does nothing it's needed so the bf char '[' has a function attached
-	pass
+def new_loop(): #Check if we should skip the loop and if so do that
+	global curchar
+	global curcell
+	if cells[curcell] == 0:
+		looplevel = 1
+		while looplevel > 0:
+			curchar += 1
+			try:
+				program[curchar]
+			except:
+				print 'Brainfuck syntax error. Quitting.'
+				print 0/0
+			if program[curchar] == ']':
+				looplevel -= 1
+			elif program[curchar] == '[':
+				looplevel += 1
 
 def find_loop(): #Finds the start loop char to match the current end loop char
 	global curchar
@@ -82,9 +93,9 @@ while curchar != len(program):
 	charref.get(char)() #Looks up and runs the function attached to the current char
 	curchar += 1 #Move char pointer along 1
 	if visualizer and char != '.': #Prints the visuliser if it's active and currchar isn't a print char
+		print char
 		print [[cells[curcell]] if x == curcell else cells[x] for x in range(0,len(cells))]
 		time.sleep(0.07)
-		console.clear()
 
 #Prints at program end
 print 'Complete'
